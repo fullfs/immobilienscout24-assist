@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<head>
+  <link rel="shortcut icon" href="<%= webpackConfig.output.publicPath %>favicon.ico">
+</head>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+
+  <style>
+    body {
+      margin: 0;
+      font: 13.3333px Arial;
+    }
+
+    p {
+      margin: 6px 0;
+    }
+
+    .grid {
+      height: calc(100vh - 82px);
+      display: grid;
+      grid-template-rows: 1fr;
+    }
+
+    .grid._with-logs {
+      grid-template-rows: 1fr 162px;
+    }
+
+    .logs-toggle {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-top: 1px solid #ccc;
+      background: #f4f4f4;
+    }
+
+    .logs {
+      overflow: auto;
+      overflow-x: hidden;
+      border-top: 1px solid #ccc;
+      padding: 0 10px;
+    }
+
+    .log._error {
+      color: red;
+    }
+
+    .log._size-2 {
+      font-size: 120%;
+    }
+
+    .contents {
+      padding: 10px;
+      overflow: auto;
+      overflow-x: hidden;
+      flex-wrap: wrap;
+      align-content: flex-start;
+    }
+
+    .status {
+      width: 30px;
+      height: 30px;
+      display: inline-block;
+      vertical-align: middle;
+      background: rgb(169, 169, 169);
+      border: 1px solid #a1a1a1;
+    }
+
+    .status._problem {
+      background: #fff700;
+    }
+
+    .status._good {
+      background: #33ff00;
+    }
+
+    .status._bad {
+      background: #ff0000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" style="display: none">
+    <div class="grid" :class="{ '_with-logs': logsVisible }">
+
+      <div class="logs-toggle">
+        <button @click="logsVisible = !logsVisible">
+          {{ logsVisible ? 'Hide logs' : 'Show logs' }}
+        </button>
+        &nbsp;
+        &nbsp;
+        <label>
+          <input type="checkbox" v-model="logsScrollDown">
+          Autoscroll logs
+        </label>
+      </div>
+      <div v-if="logsVisible" ref="logger" class="logs">
+        <p v-for="log in logs" class="log" :class="{ _error: log.type === 'error', '_size-2': log.size === 2 }"
+          :key="log.id">
+          <template v-if="log.copy">[{{ log.copy }}]</template>
+          [{{ log.timestamp }}]
+          {{ log.message }}
+        </p>
+      </div>
+    </div>
+    <div
+      style="position: fixed; bottom: 0; left: 0; right: 0; background: #f4f4f4; box-sizing: border-box; height: 82px; padding: 12px">
+      <div style="margin-bottom: 12px;">
+        URL: 
+        <input type="text" :value="base" @input="setBase($event.target.value)" style="width: 600px;">
+        &nbsp;
+        &nbsp;
+        <button @click="handleRun" :disabled="activated">
+          Start
+        </button>
+        &nbsp;
+        &nbsp;
+        <button @click="handleStop" :disabled="!activated">
+          Stop
+        </button>
+        &nbsp;
+        &nbsp;
+        <div class="status" :class="{
+          '_good': activated && failsCounter === 0,
+          '_problem': activated && failsCounter > 0 && failsCounter < 3,
+          '_bad': activated && failsCounter >= 3,
+        }">
+        </div>
+        &nbsp;
+        Last reload: {{ lastReload }}
+      </div>
+      <div>
+        pushover token: 
+        <input type="text" :value="push.token" @input="setPushToken($event.target.value)" style="width: 220px;">
+        &nbsp;
+        &nbsp;
+        pushover user: 
+        <input type="text" :value="push.user" @input="setPushUser($event.target.value)" style="width: 220px;">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    require('./src/index.js');
+  </script>
+</body>
+
+</html>
