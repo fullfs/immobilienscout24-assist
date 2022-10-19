@@ -30,10 +30,10 @@ class PuppeteerWrapper {
     //#region Public API setup - cleanup
 
     async setup() {
-        const isChromePathSet = await this._setChromePath();
-        if (!isChromePathSet) {
-            return false;
-        }
+        // const isChromePathSet = await this._setChromePath();
+        // if (!isChromePathSet) {
+        //     return false;
+        // }
 
         const args = [];
         const proxy = this._options.proxy
